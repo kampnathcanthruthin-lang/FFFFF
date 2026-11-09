@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ระบบเช็คชื่อแถวหน้าเสาธง ม.6/8 - รร.แม่สะเรียง 'บริพัตรศึกษา'</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0A0A0A;
+            --card-bg: rgba(20, 20, 30, 0.65);
+            --neon-purple: #c084fc;
+            --cyber-lime: #10b981;
+            --sunset-orange: #f97316;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        body.theme-matrix {
+            --neon-purple: #22c55e;
+            --cyber-lime: #38bdf8;
+            --sunset-orange: #eab308;
+        }
+        body.theme-sunset {
+            --neon-purple: #fb923c;
+            --cyber-lime: #f43f5e;
+            --sunset-orange: #a855f7;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Prompt', 'Kanit', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            transition: background 0.3s ease;
+        }
+
+        /* 🌟 พื้นหลังตารางไซเบอร์แบบเลื่อนได้ (Animated Grid) */
+        .cyber-grid {
+            position: fixed;
+            inset: -50%;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(rgba(192, 132, 252, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(192, 132, 252, 0.04) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 0;
+            pointer-events: none;
+            transform: perspective(500px) rotateX(60deg);
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+        }
+
+        /* 🌟 แสงนีออนเรืองแสงลอยไปมาแบบสมูท (Floating Ambient Glows) */
+        .ambient-glow-1 {
+            position: fixed;
+            top: 10%;
+            left: 20%;
+            width: 45vw;
+            height: 45vw;
+            background: radial-gradient(circle, rgba(192, 132, 252, 0.15) 0%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+            filter: blur(90px);
+            animation: floatGlow1 12s ease-in-out infinite alternate;
+        }
+
+        .ambient-glow-2 {
+            position: fixed;
+            bottom: 10%;
+            right: 20%;
+            width: 45vw;
+            height: 45vw;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+            filter: blur(90px);
+            animation: floatGlow2 15s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatGlow1 {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(80px, 50px) scale(1.2); }
+        }
+
+        @keyframes floatGlow2 {
+            0% { transform: translate(0, 0) scale(1.1); }
+            100% { transform: translate(-70px, -60px) scale(0.9); }
+        }
+
+        .wrapper {
+            position: relative;
+            z-index: 2;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(192, 132, 252, 0.25);
+            border-radius: 22px;
+            padding: 16px 26px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-img {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            border: 2px solid var(--neon-purple);
+            object-fit: cover;
+            box-shadow: 0 0 20px rgba(192, 132, 252, 0.5);
+            background: #fff;
+        }
+
+        .brand-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .brand-subtitle {
+            font-size: 0.82rem;
+            color: var(--neon-purple);
+            font-weight: 400;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .badge-class {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--cyber-lime);
+            border: 1.5px solid var(--cyber-lime);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-action {
+            background: rgba(192, 132, 252, 0.15);
+            color: var(--neon-purple);
+            border: 1.5px solid var(--neon-purple);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(192, 132, 252, 0.2);
+        }
+        .btn-action:hover {
+            background: var(--neon-purple);
+            color: #000;
+            transform: translateY(-2px);
+        }
+
+        /* Hero Bento */
+        .hero-bento {
+            background: linear-gradient(145deg, rgba(25, 20, 38, 0.85) 0%, rgba(12, 12, 18, 0.95) 100%);
+            border: 3px solid var(--neon-purple);
+            border-radius: 32px;
+            padding: 38px 34px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(192, 132, 252, 0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bento::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 5px;
+            background: linear-gradient(90deg, var(--neon-purple), var(--cyber-lime), var(--sunset-orange));
+        }
+
+        h1.main-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: clamp(2rem, 4.5vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 20%, var(--neon-purple) 70%, var(--sunset-orange) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+            font-weight: 300;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1.5px solid rgba(192, 132, 252, 0.2);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            text-align: left;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 16px;
+        }
+        @media(max-width: 800px) {
+            .form-grid { grid-template-columns: 1fr; }
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--neon-purple);
+        }
+
+        input, select {
+            width: 100%;
+            background: rgba(10, 10, 16, 0.9);
+            border: 2px solid rgba(192, 132, 252, 0.3);
+            border-radius: 14px;
+            padding: 14px 18px;
+            color: #fff;
+            font-family: 'Prompt', sans-serif;
+            font-size: 1.05rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--cyber-lime);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.35);
+            background: rgba(15, 15, 24, 0.98);
+        }
+
+        .btn-submit {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--cyber-lime) 0%, #059669 100%);
+            color: #000;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 14px;
+            padding: 16px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+            transition: all 0.3s ease;
+            margin-top: 6px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(16, 185, 129, 0.7);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+        @media(max-width: 680px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            header { flex-direction: column; gap: 14px; text-align: center; }
+            .brand { flex-direction: column; }
+            .header-actions { width: 100%; justify-content: center; }
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(192, 132, 252, 0.2);
+            border-radius: 18px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+        .stat-number {
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .section-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-mini {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--cyber-lime);
+            border: 1px solid var(--cyber-lime);
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-mini:hover { background: var(--cyber-lime); color: #000; }
+
+        .table-container {
+            max-height: 220px;
+            overflow-y: auto;
+            border-radius: 14px;
+            border: 1.5px solid rgba(192, 132, 252, 0.15);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(192, 132, 252, 0.12);
+            color: var(--neon-purple);
+            padding: 12px 16px;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(10px);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 600;
+        }
+        .badge-ontime { background: rgba(16, 185, 129, 0.2); color: var(--cyber-lime); border: 1px solid var(--cyber-lime); }
+        .badge-late { background: rgba(249, 115, 22, 0.2); color: var(--sunset-orange); border: 1px solid var(--sunset-orange); }
+        .badge-leave { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; }
+        .badge-absent { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 5, 10, 0.82);
+            backdrop-filter: blur(16px);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+
+        .modal-box {
+            background: rgba(22, 22, 32, 0.95);
+            border: 2.5px solid var(--neon-purple);
+            border-radius: 28px;
+            padding: 40px 32px;
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 30px 70px rgba(192, 132, 252, 0.4);
+        }
+
+        .modal-icon { font-size: 52px; margin-bottom: 16px; }
+        .modal-text {
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .modal-btn {
+            background: linear-gradient(135deg, var(--neon-purple) 0%, #7c3aed 100%);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50px;
+            padding: 12px 40px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .schedule-box { max-width: 700px; text-align: left; }
+        .schedule-modes { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .mode-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-family: 'Kanit', sans-serif;
+            cursor: pointer;
+        }
+        .mode-btn.active, .mode-btn:hover { background: var(--neon-purple); color: #000; border-color: var(--neon-purple); }
+
+        .schedule-img-container {
+            width: 100%;
+            height: 400px;
+            background: rgba(10, 10, 15, 0.9);
+            border: 2px dashed rgba(192, 132, 252, 0.3);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .schedule-img-container img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* Autocomplete */
+        .autocomplete-container { position: relative; width: 100%; }
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid rgba(192, 132, 252, 0.3);
+            border-top: none;
+            z-index: 99;
+            top: 100%; left: 0; right: 0;
+            max-height: 220px;
+            overflow-y: auto;
+            border-radius: 0 0 14px 14px;
+            background: rgba(15, 15, 24, 0.98);
+            backdrop-filter: blur(10px);
+            display: none;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+        }
+        .autocomplete-items.show { display: block; }
+        .autocomplete-items div {
+            padding: 12px 18px;
+            cursor: pointer;
+            color: #fff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.95rem;
+        }
+        .autocomplete-items div:hover { background: rgba(192, 132, 252, 0.25); color: var(--neon-purple); }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 พื้นหลังเคลื่อนไหว (Animated Background Elements) -->
+    <div class="cyber-grid"></div>
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <!-- Popup Modal -->
+    <div class="modal-overlay" id="popupModal">
+        <div class="modal-box">
+            <div class="modal-icon" id="modalIcon">💖</div>
+            <div class="modal-text" id="modalMessage">ได้บันทึกข้อมูลเรียบร้อยแล้วครับ</div>
+            <button class="modal-btn" onclick="closePopup()">ตกลง</button>
+        </div>
+    </div>
+
+    <!-- Personal Stats Modal -->
+    <div class="modal-overlay" id="statsModal">
+        <div class="modal-box" style="text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="font-family: 'Kanit', sans-serif; font-size: 1.2rem; font-weight: 600; color: var(--neon-purple);">🔍 เช็คสถิติการมาเรียนของคุณ</div>
+                <button onclick="closeStatsModal()" style="background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div class="input-group" style="margin-bottom: 16px;">
+                <label>พิมพ์ชื่อเพื่อดูสถิติส่วนตัว</label>
+                <input type="text" id="lookupInput" placeholder="พิมพ์ชื่อของคุณ..." autocomplete="off">
+            </div>
+            <div id="lookupResult" style="background: rgba(10,10,15,0.8); padding: 16px; border-radius: 12px; border: 1px solid rgba(192,132,252,0.2); font-size: 0.95rem; color: var(--text-muted); min-height: 90px; text-align: center; display: flex; align-items: center; justify-content: center;">
+                พิมพ์ชื่อเพื่อค้นหาประวัติการเช็คชื่อของคุณ...
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="modal-btn" onclick="closeStatsModal()" style="padding: 8px 24px; font-size: 0.9rem;">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Modal -->
+    <div class="modal-overlay" id="scheduleModal">
+        <div class="modal-box schedule-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="font-family: 'Kanit', sans-serif; font-size: 1.3rem; font-weight: 600; color: var(--neon-purple);">📅 ตารางเรียนและกิจกรรม ม.6/8</div>
+                <button onclick="closeScheduleModal()" style="background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            
+            <div class="schedule-modes">
+                <button class="mode-btn active" onclick="switchSchedule('term1')">📚 ตารางเรียนหลัก</button>
+                <button class="mode-btn" onclick="switchSchedule('term2')">📖 ตารางเรียนสำรอง/เทอม 2</button>
+                <button class="mode-btn" onclick="switchSchedule('exam')">📝 ตารางสอบ</button>
+            </div>
+
+            <div class="schedule-img-container">
+                <img id="scheduleImage" src="" alt="ตารางเรียน ม.6/8">
+            </div>
+
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="modal-btn" onclick="closeScheduleModal()" style="padding: 10px 24px; font-size: 0.95rem;">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrapper">
+        <!-- Header -->
+        <header>
+            <div class="brand">
+                <img src="https://cdn.phototourl.com/member/2026-11-09-3f11b461-ae6c-4660-92d3-e2d0f8874582.jpg" alt="โลโก้โรงเรียน" class="logo-img" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png'">
+                <div>
+                    <div class="brand-title">รร.แม่สะเรียง "บริพัตรศึกษา"</div>
+                    <div class="brand-subtitle">ระบบเช็คชื่อแถวหน้าเสาธง</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-action" onclick="toggleTheme()" title="เปลี่ยนธีมสี">🎨 ธีมสี</button>
+                <button class="btn-action" onclick="openStatsModal()">🔍 เช็คสถิติ</button>
+                <button class="btn-action" onclick="openScheduleModal()">📅 ตารางเรียน</button>
+                <div class="badge-class">ม.6/8</div>
+            </div>
+        </header>
+
+        <!-- Hero Bento (ลงทะเบียนเด่นสุดด้านบน) -->
+        <section class="hero-bento">
+            <h1 class="main-title">MORNING CHECK-IN 6/8</h1>
+            <p class="hero-desc">คลิกเลือกชื่อและสถานะด้านล่างเพื่อบันทึกเวลามาแถวหน้าเสาธง</p>
+            
+            <div class="glass-card" style="background: rgba(12, 12, 18, 0.75);">
+                <form id="checkinForm" class="form-grid">
+                    <div class="input-group">
+                        <label for="studentId">✨ คลิกเลือกชื่อ หรือ พิมพ์ค้นหา</label>
+                        <div class="autocomplete-container">
+                            <input type="text" id="studentId" placeholder="คลิกเพื่อเลือกชื่อ..." required autocomplete="off">
+                            <div id="autocompleteList" class="autocomplete-items"></div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="status">สถานะการมาเรียน</label>
+                        <select id="status">
+                            <option value="มาทันเวลา">✅ มาทันเวลา</option>
+                            <option value="มาสาย">⚠️ มาสาย</option>
+                            <option value="ลา">🟦 ลา (มีใบลา)</option>
+                            <option value="ขาด">❌ ขาดเรียน</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="checkDate">วันที่เช็คชื่อ</label>
+                        <input type="date" id="checkDate">
+                    </div>
+                    <button type="submit" id="submitBtn" class="btn-submit">🚀 บันทึกข้อมูลเข้าสู่ระบบ</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Stats Dashboard (ย้ายลงมาด้านล่าง) -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="statOntime" style="color: var(--cyber-lime);">0</div>
+                <div class="stat-label">✅ มาทันเวลา</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statLate" style="color: var(--sunset-orange);">0</div>
+                <div class="stat-label">⚠️ มาสาย</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statLeave" style="color: #60a5fa;">0</div>
+                <div class="stat-label">🟦 ลา</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statAbsent" style="color: #f87171;">0</div>
+                <div class="stat-label">❌ ขาดเรียน</div>
+            </div>
+        </div>
+
+        <!-- Data Table Section -->
+        <section class="glass-card">
+            <div class="section-header-flex">
+                <div class="section-title">📊 รายงานการเข้าแถววันนี้</div>
+                <div class="action-buttons-group">
+                    <button class="btn-mini" onclick="copySummaryForLine()">📋 คัดลอกรายชื่อสรุปผลของวันนี้</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>เวลา / วันที่</th>
+                            <th>ชื่อ - สกุล นักเรียน</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultTable">
+                        <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">กำลังโหลดข้อมูล...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwcRtM9amOcrQfxwx1-_L0n7efhDXC3vv4EXxX_RewVBSBI9MZAbDlFj-6QvrjHpQUP/exec";
+
+        document.getElementById('checkDate').valueAsDate = new Date();
+
+        const studentList = [
+            "นาย กัมปนาท จันทรุทิน", "นาย ธีรภัทร โสมิญะ", "นาย สุรัลต์ชาญ ไทสวัสดิ์กุล",
+            "นาย อติกันต์ ไผ่อุรุวนา", "นาย เอื้ออังกูร กรีแก้ว", "นาย วิชยุตม์ ฝั้นวีระ",
+            "นาย พาทิศ ใจรักสงบ", "นางสาว จันทพร อรัญญางาม", "นางสาว จิณัฐตา มาสี",
+            "นางสาว ฉัตรฑริกา ก้างยาง", "นางสาว เบญจมาศ เลิศอนันต์วิมล", "นางสาว ภูริชญา รุ่งเรือง",
+            "นางสาว วิภานันท์ ษมาจิตรุ่งเรือง", "นางสาว อริสรา ศรีไว", "นางสาว เสาร์วรินทร์ วรีรัตน์",
+            "นางสาว เบญญา ไพรวัลย์", "นางสาว สุรารักษ์ สมบัติทองแท้", "นางสาว กัลย์สุดา สิริเสริมใบบุญ",
+            "นางสาว กาญจนา วนาเจริญ", "นางสาว เขมลาวัณย์ มณีรัตน์ไพบูลย์", "นางสาว แคทรียา จอมแกล้วกล้า",
+            "นางสาว งามศิริ พิมพารุ่งโรจน์", "นางสาว จารุภา นิธิในเกียรติ", "นางสาว จิรนันท์ นวลแสง",
+            "นางสาว ชยุดา ไสวสายเมือง", "นางสาว ณฐินี คงเปรมปรีดิ์", "นางสาว นิรดา ชื่นเพลิน",
+            "นางสาว พัชมัย ใฝ่เงินทอง", "นางสาว รัตยากร หทัยภักดี", "นางสาว ศุภสตา นิธิเบญจพร",
+            "นางสาว โศรดา เลิศพิจารณ์นิติ", "นางสาว สายน้ำ สุริยะ", "นางสาว สิรินดา รติเทวินทร์",
+            "นางสาว สุภานัน มาลีสุข", "นางสาว อรพรรณ ภูไพรเจริญ", "นางสาว อริยา คงกิจมั่นเลิศ",
+            "นางสาว สุพินาล ประสงค์เลิศกุล"
+        ];
+
+        let latestDataLogs = [];
+
+        const savedTheme = localStorage.getItem('m68_theme');
+        if(savedTheme) { document.body.className = savedTheme; }
+
+        function toggleTheme() {
+            let current = document.body.className;
+            let next = '';
+            if(current === '') next = 'theme-matrix';
+            else if(current === 'theme-matrix') next = 'theme-sunset';
+            else next = '';
+            document.body.className = next;
+            localStorage.setItem('m68_theme', next);
+            playAudioEffect('click');
+        }
+
+        function playAudioEffect(type) {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if(type === 'success') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+                } else if(type === 'warning') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(150, audioCtx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+                } else {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(580, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.08);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+                }
+            } catch(e) {}
+        }
+
+        const inputField = document.getElementById("studentId");
+        const listContainer = document.getElementById("autocompleteList");
+
+        function renderList(filterText = "") {
+            listContainer.innerHTML = "";
+            const filtered = studentList.filter(name => name.toLowerCase().includes(filterText.toLowerCase()));
+            if (filtered.length === 0) { listContainer.classList.remove("show"); return; }
+            filtered.forEach(name => {
+                const item = document.createElement("div");
+                item.innerText = name;
+                item.addEventListener("click", function() {
+                    inputField.value = name;
+                    listContainer.classList.remove("show");
+                });
+                listContainer.appendChild(item);
+            });
+            listContainer.classList.add("show");
+        }
+
+        inputField.addEventListener("focus", function() { renderList(this.value); });
+        inputField.addEventListener("input", function() { renderList(this.value); });
+        document.addEventListener("click", function(e) {
+            if (e.target !== inputField && !listContainer.contains(e.target)) { listContainer.classList.remove("show"); }
+        });
+
+        function openStatsModal() {
+            playAudioEffect('click');
+            document.getElementById('statsModal').classList.add('active');
+            document.getElementById('lookupInput').value = '';
+            document.getElementById('lookupResult').innerHTML = 'พิมพ์ชื่อเพื่อค้นหาประวัติการเช็คชื่อของคุณ...';
+        }
+        function closeStatsModal() { document.getElementById('statsModal').classList.remove('active'); }
+
+        const lookupInput = document.getElementById('lookupInput');
+        lookupInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            const resultBox = document.getElementById('lookupResult');
+            if(!query) {
+                resultBox.innerHTML = 'พิมพ์ชื่อเพื่อค้นหาประวัติการเช็คชื่อของคุณ...';
+                return;
+            }
+            const matchedLogs = latestDataLogs.filter(row => row.studentId.includes(query));
+            if(matchedLogs.length === 0) {
+                resultBox.innerHTML = `<span style="color: var(--sunset-orange);">ไม่พบประวัติการเช็คชื่อของ "${query}"</span>`;
+                return;
+            }
+            let ontime = 0, late = 0, leave = 0, absent = 0;
+            matchedLogs.forEach(r => {
+                if(r.status === 'มาทันเวลา') ontime++;
+                else if(r.status === 'มาสาย') late++;
+                else if(r.status === 'ลา') leave++;
+                else if(r.status === 'ขาด') absent++;
+            });
+            resultBox.innerHTML = `
+                <div style="font-family:'Kanit',sans-serif; color:#fff; font-size:1.05rem; margin-bottom:6px;">👤 ${matchedLogs[0].studentId}</div>
+                <div>สถิติรวม: <span style="color:var(--cyber-lime);">มา ${ontime}</span> | <span style="color:var(--sunset-orange);">สาย ${late}</span> | <span style="color:#60a5fa;">ลา ${leave}</span> | <span style="color:#f87171;">ขาด ${absent}</span></div>
+            `;
+        });
+
+        function showPopup(message, icon = "💖", soundType = "success") {
+            playAudioEffect(soundType);
+            document.getElementById('modalMessage').innerText = message;
+            document.getElementById('modalIcon').innerText = icon;
+            document.getElementById('popupModal').classList.add('active');
+        }
+        function closePopup() { document.getElementById('popupModal').classList.remove('active'); }
+
+        function openScheduleModal() {
+            playAudioEffect('click');
+            document.getElementById('scheduleModal').classList.add('active');
+            switchSchedule('term1');
+        }
+        function closeScheduleModal() { document.getElementById('scheduleModal').classList.remove('active'); }
+
+        const scheduleData = {
+            term1: "https://cdn.phototourl.com/member/2026-11-09-9821d791-59ff-4a43-903f-afdebdf83c1f.jpg",
+            term2: "https://cdn.phototourl.com/member/2026-11-09-9821d791-59ff-4a43-903f-afdebdf83c1f.jpg",
+            exam: "https://cdn.phototourl.com/member/2026-11-09-9821d791-59ff-4a43-903f-afdebdf83c1f.jpg"
+        };
+
+        function switchSchedule(mode) {
+            const buttons = document.querySelectorAll('.mode-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            if(event && event.target) event.target.classList.add('active');
+            document.getElementById('scheduleImage').src = scheduleData[mode];
+        }
+
+        document.getElementById('checkinForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const studentId = document.getElementById('studentId').value.trim();
+            const status = document.getElementById('status').value;
+            const checkDate = document.getElementById('checkDate').value;
+            const btn = document.getElementById('submitBtn');
+
+            if(!studentId) return;
+
+            const todayStr = new Date(checkDate).toLocaleDateString();
+            const alreadyChecked = latestDataLogs.some(row => {
+                if(!row.timestamp) return false;
+                const rowDate = new Date(row.timestamp).toLocaleDateString();
+                return row.studentId === studentId && rowDate === todayStr;
+            });
+
+            if(alreadyChecked) {
+                showPopup(`คุณ ${studentId} ได้บันทึกการเช็คชื่อของวันนี้ไปแล้วครับ!`, "⚠️", "warning");
+                return;
+            }
+
+            btn.style.opacity = '0.6';
+            btn.disabled = true;
+
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ studentId: studentId, status: status, date: checkDate })
+            })
+            .then(res => res.json())
+            .then(res => {
+                showPopup("ได้บันทึกข้อมูลของคนน่ารักเรียบร้อยแล้วครับ 💖", "💖", "success");
+                document.getElementById('studentId').value = '';
+                loadData();
+            })
+            .catch(err => {
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
+                console.error(err);
+            })
+            .finally(() => {
+                btn.style.opacity = '1';
+                btn.disabled = false;
+            });
+        });
+
+        function copySummaryForLine() {
+            const checkDateVal = document.getElementById('checkDate').value;
+            const targetDateStr = new Date(checkDateVal).toLocaleDateString();
+            const todayDateFormatted = new Date(checkDateVal).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            const todayLogs = latestDataLogs.filter(row => {
+                if(!row.timestamp) return false;
+                return new Date(row.timestamp).toLocaleDateString() === targetDateStr;
+            });
+
+            let ontimeList = [];
+            let lateList = [];
+            let leaveList = [];
+            let absentListInput = [];
+
+            todayLogs.forEach(row => {
+                if(row.status === 'มาทันเวลา') ontimeList.push(row.studentId);
+                else if(row.status === 'มาสาย') lateList.push(row.studentId);
+                else if(row.status === 'ลา') leaveList.push(row.studentId);
+                else if(row.status === 'ขาด') absentListInput.push(row.studentId);
+            });
+
+            const checkedNames = todayLogs.map(r => r.studentId);
+            let notCheckedList = studentList.filter(name => !checkedNames.includes(name));
+            let totalAbsentOrNotChecked = [...absentListInput, ...notCheckedList];
+
+            let summaryText = `📌 รายงานสรุปผลเช็คชื่อ ม.6/8\n📅 ประจำวันที่ ${todayDateFormatted}\n----------------------------------\n`;
+            summaryText += `✅ มาทันเวลา (${ontimeList.length} คน):\n${ontimeList.length > 0 ? ontimeList.map((n, i) => `${i+1}. ${n}`).join('\n') : '- ไม่มี -'}\n\n`;
+            summaryText += `⚠️ มาสาย (${lateList.length} คน):\n${lateList.length > 0 ? lateList.map((n, i) => `${i+1}. ${n}`).join('\n') : '- ไม่มี -'}\n\n`;
+            summaryText += `🟦 ลา (${leaveList.length} คน):\n${leaveList.length > 0 ? leaveList.map((n, i) => `${i+1}. ${n}`).join('\n') : '- ไม่มี -'}\n\n`;
+            summaryText += `❌ ขาด / ยังไม่เช็คชื่อ (${totalAbsentOrNotChecked.length} คน):\n${totalAbsentOrNotChecked.length > 0 ? totalAbsentOrNotChecked.map((n, i) => `${i+1}. ${n}`).join('\n') : '- ไม่มี -'}\n----------------------------------\n✨ ระบบเช็คชื่ออัตโนมัติ ม.6/8`;
+
+            navigator.clipboard.writeText(summaryText).then(() => {
+                showPopup("คัดลอกรายชื่อสรุปผลแบบละเอียดสำหรับส่ง LINE แล้ว! 📋", "🎉", "success");
+            }).catch(err => {
+                alert("ไม่สามารถคัดลอกอัตโนมัติได้");
+            });
+        }
+
+        function loadData() {
+            if(!WEB_APP_URL) return;
+            fetch(WEB_APP_URL)
+            .then(res => res.json())
+            .then(data => {
+                latestDataLogs = data || [];
+                const tbody =, document.getElementById('resultTable');
+                tbody.innerHTML = '';
+                
+                let countOntime = 0, countLate = 0, countLeave = 0, countAbsent = 0;
+
+                if(!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">ยังไม่มีข้อมูลวันนี้</td></tr>`;
+                    return;
+                }
+
+                data.reverse().forEach(row => {
+                    if(row.status === 'มาทันเวลา') countOntime++;
+                    else if(row.status === 'มาสาย') countLate++;
+                    else if(row.status === 'ลา') countLeave++;
+                    else if(row.status === 'ขาด') countAbsent++;
+
+                    let tr = document.createElement('tr');
+                    let timeObj = new Date(row.timestamp);
+                    let timeStr = timeObj.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                    let dateStr = timeObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+                    
+                    let badgeClass = 'badge-ontime';
+                    if(row.status === 'มาสาย') badgeClass = 'badge-late';
+                    else if(row.status === 'ลา') badgeClass = 'badge-leave';
+                    else if(row.status === 'ขาด') badgeClass = 'badge-absent';
+
+                    tr.innerHTML = `
+                        <td>${dateStr} (${timeStr})</td>
+                        <td style="font-weight: 600;">${row.studentId}</td>
+                        <td><span class="status-badge ${badgeClass}">${row.status}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById('statOntime').innerText = countOntime;
+                document.getElementById('statLate').innerText = countLate;
+                document.getElementById('statLeave').innerText = countLeave;
+                document.getElementById('statAbsent').innerText = countAbsent;
+
+            }).catch(err => console.error(err));
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
