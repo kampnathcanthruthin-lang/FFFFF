@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ระบบเช็คชื่อแถวหน้าเสาธง ม.6/8 - โรงเรียนแม่สะเรียง 'บริพัตรศึกษา'</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #070707;
+            --card-bg: rgba(18, 18, 18, 0.85);
+            --gold-primary: #d4af37;
+            --gold-light: #f3e5ab;
+            --gold-dark: #aa820a;
+            --text-main: #f5f5f5;
+            --text-muted: #a3a3a3;
+            --border-gold: rgba(212, 175, 55, 0.35);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Prompt', 'Kanit', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 🌟 พื้นหลังแสงระยิบระยับเคลื่อนไหว (Starry Gold Sparkles Animation) */
+        .sparkle-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at 50% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
+                        radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(243, 229, 171, 0.06) 0%, transparent 50%);
+            overflow: hidden;
+        }
+
+        .sparkle-bg::before, .sparkle-bg::after {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background-image: 
+                radial-gradient(1.5px 1.5px at 100px 150px, rgba(212, 175, 55, 0.6) 100%, transparent),
+                radial-gradient(1px 1px at 300px 250px, rgba(243, 229, 171, 0.5) 100%, transparent),
+                radial-gradient(2px 2px at 500px 100px, rgba(212, 175, 55, 0.4) 100%, transparent),
+                radial-gradient(1px 1px at 700px 400px, rgba(255, 255, 255, 0.4) 100%, transparent),
+                radial-gradient(1.5px 1.5px at 200px 500px, rgba(212, 175, 55, 0.5) 100%, transparent),
+                radial-gradient(2px 2px at 800px 200px, rgba(243, 229, 171, 0.6) 100%, transparent);
+            background-repeat: repeat;
+            background-size: 600px 600px;
+            animation: sparkleMove 40s linear infinite;
+        }
+
+        .sparkle-bg::after {
+            background-size: 400px 400px;
+            animation: sparkleMove 25s linear infinite reverse;
+            opacity: 0.6;
+        }
+
+        @keyframes sparkleMove {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(300px) rotate(5deg); }
+        }
+
+        .wrapper {
+            position: relative;
+            z-index: 2;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-gold);
+            border-radius: 16px;
+            padding: 18px 28px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-img {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: 1.5px solid var(--gold-primary);
+            object-fit: cover;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+            background: #fff;
+        }
+
+        .brand-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 500;
+            color: var(--text-main);
+            letter-spacing: 0.5px;
+        }
+
+        .brand-subtitle {
+            font-size: 0.8rem;
+            color: var(--gold-primary);
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-class {
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--gold-light);
+            border: 1px solid var(--gold-primary);
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .btn-action {
+            background: transparent;
+            color: var(--gold-primary);
+            border: 1px solid var(--gold-primary);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-action:hover {
+            background: var(--gold-primary);
+            color: #000;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Hero Bento */
+        .hero-bento {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(10, 10, 10, 0.98) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: 24px;
+            padding: 40px 36px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bento::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+        }
+
+        h1.main-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            color: #ffffff;
+            background: linear-gradient(135deg, #ffffff 30%, var(--gold-light) 70%, var(--gold-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-gold);
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            text-align: left;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 18px;
+        }
+        @media(max-width: 800px) {
+            .form-grid { grid-template-columns: 1fr; }
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--gold-light);
+            letter-spacing: 0.5px;
+        }
+
+        input, select {
+            width: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            border: 1px solid var(--border-gold);
+            border-radius: 10px;
+            padding: 13px 16px;
+            color: #fff;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+        }
+
+        .btn-submit {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-dark) 100%);
+            color: #070707;
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.5);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        @media(max-width: 680px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            header { flex-direction: column; gap: 14px; text-align: center; }
+            .brand { flex-direction: column; }
+            .header-actions { width: 100%; justify-content: center; }
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-gold);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .stat-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--gold-light);
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-family: 'Kanit', sans-serif;
+            font-weight: 300;
+        }
+
+        .section-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--text-main);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-mini {
+            background: transparent;
+            color: var(--gold-primary);
+            border: 1px solid var(--gold-primary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-mini:hover {
+            background: var(--gold-primary);
+            color: #000;
+        }
+
+        .table-container {
+            max-height: 240px;
+            overflow-y: auto;
+            border-radius: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(212, 175, 55, 0.08);
+            color: var(--gold-primary);
+            padding: 12px 18px;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(10px);
+        }
+
+        td {
+            padding: 12px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 400;
+        }
+        .badge-ontime { background: rgba(212, 175, 55, 0.15); color: var(--gold-light); border: 1px solid var(--gold-primary); }
+        .badge-late { background: rgba(200, 130, 10, 0.15); color: #f59e0b; border: 1px solid #d97706; }
+        .badge-leave { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid #3b82f6; }
+        .badge-absent { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid #ef4444; }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+
+        .modal-box {
+            background: #121212;
+            border: 1px solid var(--gold-primary);
+            border-radius: 20px;
+            padding: 35px 28px;
+            text-align: center;
+            max-width: 440px;
+            width: 90%;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.9);
+        }
+
+        .modal-icon { font-size: 40px; margin-bottom: 14px; color: var(--gold-primary); }
+        .modal-text {
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: #fff;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .modal-btn {
+            background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-dark) 100%);
+            color: #070707;
+            border: none;
+            border-radius: 30px;
+            padding: 10px 35px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .schedule-box { max-width: 700px; text-align: left; }
+        .schedule-modes { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .mode-btn {
+            background: transparent;
+            border: 1px solid var(--border-gold);
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        .mode-btn.active, .mode-btn:hover { background: var(--gold-primary); color: #000; border-color: var(--gold-primary); }
+
+        .schedule-img-container {
+            width: 100%;
+            height: 380px;
+            background: #000;
+            border: 1px dashed var(--border-gold);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .schedule-img-container img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* Autocomplete */
+        .autocomplete-container { position: relative; width: 100%; }
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid var(--gold-primary);
+            border-top: none;
+            z-index: 99;
+            top: 100%; left: 0; right: 0;
+            max-height: 220px;
+            overflow-y: auto;
+            border-radius: 0 0 10px 10px;
+            background: #121212;
+            display: none;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.8);
+        }
+        .autocomplete-items.show { display: block; }
+        .autocomplete-items div {
+            padding: 12px 16px;
+            cursor: pointer;
+            color: #fff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.92rem;
+        }
+        .autocomplete-items div:hover { background: rgba(212, 175, 55, 0.2); color: var(--gold-light); }
+    </style>
+</head>
+<body>
+
+    <!-- 🌟 พื้นหลังระยิบระยับเคลื่อนไหว -->
+    <div class="sparkle-bg"></div>
+
+    <!-- Popup Modal -->
+    <div class="modal-overlay" id="popupModal">
+        <div class="modal-box">
+            <div class="modal-icon">❖</div>
+            <div class="modal-text" id="modalMessage">บันทึกข้อมูลเรียบร้อยแล้ว</div>
+            <button class="modal-btn" onclick="closePopup()">ตกลง</button>
+        </div>
+    </div>
+
+    <!-- Personal Stats Modal -->
+    <div class="modal-overlay" id="statsModal">
+        <div class="modal-box" style="text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="font-family: 'Kanit', sans-serif; font-size: 1.1rem; font-weight: 500; color: var(--gold-primary);">ตรวจสอบสถิติส่วนบุคคล</div>
+                <button onclick="closeStatsModal()" style="background: none; border: none; color: #fff; font-size: 1.4rem; cursor: pointer;">&times;</button>
+            </div>
+            <div class="input-group" style="margin-bottom: 16px;">
+                <label>พิมพ์ชื่อเพื่อค้นหาประวัติ</label>
+                <input type="text" id="lookupInput" placeholder="พิมพ์ชื่อของคุณ..." autocomplete="off">
+            </div>
+            <div id="lookupResult" style="background: #0a0a0a; padding: 16px; border-radius: 10px; border: 1px solid var(--border-gold); font-size: 0.9rem; color: var(--text-muted); min-height: 80px; text-align: center; display: flex; align-items: center; justify-content: center;">
+                พิมพ์ชื่อเพื่อค้นหาประวัติการเช็คชื่อ...
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="modal-btn" onclick="closeStatsModal()" style="padding: 8px 22px; font-size: 0.85rem;">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Modal -->
+    <div class="modal-overlay" id="scheduleModal">
+        <div class="modal-box schedule-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="font-family: 'Kanit', sans-serif; font-size: 1.1rem; font-weight: 500; color: var(--gold-primary);">ตารางเรียนและกิจกรรม ม.6/8</div>
+                <button onclick="closeScheduleModal()" style="background: none; border: none; color: #fff; font-size: 1.4rem; cursor: pointer;">&times;</button>
+            </div>
+            
+            <div class="schedule-modes">
+                <button class="mode-btn active" onclick="switchSchedule('term1')">ตารางเรียนหลัก</button>
+                <button class="mode-btn" onclick="switchSchedule('term2')">ตารางเรียนสำรอง</button>
+                <button class="mode-btn" onclick="switchSchedule('exam')">ตารางสอบ</button>
+            </div>
+
+            <div class="schedule-img-container">
+                <img id="scheduleImage" src="" alt="ตารางเรียน">
+            </div>
+
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="modal-btn" onclick="closeScheduleModal()" style="padding: 8px 22px; font-size: 0.85rem;">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrapper">
+        <!-- Header -->
+        <header>
+            <div class="brand">
+                <img src="https://cdn.phototourl.com/member/2026-11-09-3f11b461-ae6c-4660-92d3-e2d0f8874582.jpg" alt="โลโก้โรงเรียน" class="logo-img" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png'">
+                <div>
+                    <div class="brand-title">โรงเรียนแม่สะเรียง "บริพัตรศึกษา"</div>
+                    <div class="brand-subtitle">ระบบเช็คชื่อแถวหน้าเสาธง</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-action" onclick="openStatsModal()">ตรวจสอบสถิติ</button>
+                <button class="btn-action" onclick="openScheduleModal()">ตารางเรียน</button>
+                <div class="badge-class">ม.6/8</div>
+            </div>
+        </header>
+
+        <!-- Hero Bento -->
+        <section class="hero-bento">
+            <h1 class="main-title">MORNING CHECK-IN</h1>
+            <p class="hero-desc">บันทึกเวลามาแถวหน้าเสาธง ระดับชั้นมัธยมศึกษาปีที่ 6/8</p>
+            
+            <div class="glass-card">
+                <form id="checkinForm" class="form-grid">
+                    <div class="input-group">
+                        <label for="studentId">เลือกชื่อ หรือ พิมพ์ค้นหา</label>
+                        <div class="autocomplete-container">
+                            <input type="text" id="studentId" placeholder="คลิกเพื่อเลือกรายชื่อ..." required autocomplete="off">
+                            <div id="autocompleteList" class="autocomplete-items"></div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="status">สถานะการมาเรียน</label>
+                        <select id="status">
+                            <option value="มาทันเวลา">มาทันเวลา</option>
+                            <option value="มาสาย">มาสาย</option>
+                            <option value="ลา">ลา (มีใบลา)</option>
+                            <option value="ขาด">ขาดเรียน</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="checkDate">วันที่เช็คชื่อ</label>
+                        <input type="date" id="checkDate">
+                    </div>
+                    <button type="submit" id="submitBtn" class="btn-submit">ยืนยันการบันทึกข้อมูล</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Stats Dashboard -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="statOntime">0</div>
+                <div class="stat-label">มาทันเวลา</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statLate">0</div>
+                <div class="stat-label">มาสาย</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statLeave">0</div>
+                <div class="stat-label">ลา</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statAbsent">0</div>
+                <div class="stat-label">ขาดเรียน</div>
+            </div>
+        </div>
+
+        <!-- Data Table Section -->
+        <section class="glass-card">
+            <div class="section-header-flex">
+                <div class="section-title">รายงานการเข้าแถวประจำวัน</div>
+                <div class="action-buttons-group">
+                    <button class="btn-mini" onclick="copySummaryForLine()">คัดลอกรายงานสรุปผล</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>เวลา / วันที่</th>
+                            <th>ชื่อ - สกุล นักเรียน</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultTable">
+                        <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">กำลังโหลดข้อมูล...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxSx1hNLsYAA0QgffU6VpZHOslUlroWxhA-kwM5KWiiKA8DLnGPoVTsajBm0o0P9T6O/exec";
+
+        document.getElementById('checkDate').valueAsDate = new Date();
+
+        const studentList = [
+            "นาย กัมปนาท จันทรุทิน", "นาย ธีรภัทร โสมิญะ", "นาย สุรัลต์ชาญ ไทสวัสดิ์กุล",
+            "นาย อติกันต์ ไผ่อุรุวนา", "นาย เอื้ออังกูร กรีแก้ว", "นาย วิชยุตม์ ฝั้นวีระ",
+            "นาย พาทิศ ใจรักสงบ", "นางสาว จันทพร อรัญญางาม", "นางสาว จิณัฐตา มาสี",
+            "นางสาว ฉัตรฑริกา ก้างยาง", "นางสาว เบญจมาศ เลิศอนันต์วิมล", "นางสาว ภูริชญา รุ่งเรือง",
+            "นางสาว วิภานันท์ ษมาจิตรุ่งเรือง", "นางสาว อริสรา ศรีไว", "นางสาว เสาร์วรินทร์ วรีรัตน์",
+            "นางสาว เบญญา ไพรวัลย์", "นางสาว สุรารักษ์ สมบัติทองแท้", "นางสาว กัลย์สุดา สิริเสริมใบบุญ",
+            "นางสาว กาญจนา วนาเจริญ", "นางสาว เขมลาวัณย์ มณีรัตน์ไพบูลย์", "นางสาว แคทรียา จอมแกล้วกล้า",
+            "นางสาว งามศิริ พิมพารุ่งโรจน์", "นางสาว จารุภา นิธิในเกียรติ", "นางสาว จิรนันท์ นวลแสง",
+            "นางสาว ชยุดา ไสวสายเมือง", "นางสาว ณฐินี คงเปรมปรีดิ์", "นางสาว นิรดา ชื่นเพลิน",
+            "นางสาว พัชมัย ใฝ่เงินทอง", "นางสาว รัตยากร หทัยภักดี", "นางสาว ศุภสตา นิธิเบญจพร",
+            "นางสาว โศรดา เลิศพิจารณ์นิติ", "นางสาว สายน้ำ สุริยะ", "นางสาว สิรินดา รติเทวินทร์",
+            "นางสาว สุภานัน มาลีสุข", "นางสาว อรพรรณ ภูไพรเจริญ", "นางสาว อริยา คงกิจมั่นเลิศ",
+            "นางสาว สุพินาล ประสงค์เลิศกุล"
+        ];
+
+        let latestDataLogs = [];
+
+        function playAudioEffect(type) {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(660, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            } catch(e) {}
+        }
+
+        const inputField = document.getElementById("studentId");
+        const listContainer = document.getElementById("autocompleteList");
+
+        function renderList(filterText = "") {
+            listContainer.innerHTML = "";
+            const filtered = studentList.filter(name => name.toLowerCase().includes(filterText.toLowerCase()));
+            if (filtered.length === 0) { listContainer.classList.remove("show"); return; }
+            filtered.forEach(name => {
+                const item = document.createElement("div");
+                item.innerText = name;
+                item.addEventListener("click", function() {
+                    inputField.value = name;
+                    listContainer.classList.remove("show");
+                });
+                listContainer.appendChild(item);
+            });
+            listContainer.classList.add("show");
+        }
+
+        inputField.addEventListener("focus", function() { renderList(this.value); });
+        inputField.addEventListener("input", function() { renderList(this.value); });
+        document.addEventListener("click", function(e) {
+            if (e.target !== inputField && !listContainer.contains(e.target)) { listContainer.classList.remove("show"); }
+        });
+
+        function openStatsModal() {
+            playAudioEffect();
+            document.getElementById('statsModal').classList.add('active');
+            document.getElementById('lookupInput').value = '';
+            document.getElementById('lookupResult').innerHTML = 'พิมพ์ชื่อเพื่อค้นหาประวัติการเช็คชื่อ...';
+        }
+        function closeStatsModal() { document.getElementById('statsModal').classList.remove('active'); }
+
+        const lookupInput = document.getElementById('lookupInput');
+        lookupInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            const resultBox = document.getElementById('lookupResult');
+            if(!query) {
+                resultBox.innerHTML = 'พิมพ์ชื่อเพื่อค้นหาประวัติการเช็คชื่อ...';
+                return;
+            }
+            const matchedLogs = latestDataLogs.filter(row => row.studentId.includes(query));
+            if(matchedLogs.length === 0) {
+                resultBox.innerHTML = `<span style="color: #f59e0b;">ไม่พบประวัติการเช็คชื่อของ "${query}"</span>`;
+                return;
+            }
+            let ontime = 0, late = 0, leave = 0, absent = 0;
+            matchedLogs.forEach(r => {
+                if(r.status === 'มาทันเวลา') ontime++;
+                else if(r.status === 'มาสาย') late++;
+                else if(r.status === 'ลา') leave++;
+                else if(r.status === 'ขาด') absent++;
+            });
+            resultBox.innerHTML = `
+                <div style="font-family:'Kanit',sans-serif; color:#fff; font-size:1rem; margin-bottom:6px;">${matchedLogs[0].studentId}</div>
+                <div>สถิติรวม: มาทันเวลา ${ontime} | มาสาย ${late} | ลา ${leave} | ขาดเรียน ${absent}</div>
+            `;
+        });
+
+        function showPopup(message) {
+            playAudioEffect();
+            document.getElementById('modalMessage').innerText = message;
+            document.getElementById('popupModal').classList.add('active');
+        }
+        function closePopup() { document.getElementById('popupModal').classList.remove('active'); }
+
+        function openScheduleModal() {
+            playAudioEffect();
+            document.getElementById('scheduleModal').classList.add('active');
+            switchSchedule('term1');
+        }
+        function closeScheduleModal() { document.getElementById('scheduleModal').classList.remove('active'); }
+
+        const scheduleData = {
+            term1: "https://cdn.phototourl.com/member/2026-11-09-9821d791-59ff-4a43-903f-afdebdf83c1f.jpg",
+            term2: "https://cdn.phototourl.com/member/2026-11-09-9821d791-59ff-4a43-903f-afdebdf83c1f.jpg",
+            exam: "https://cdn.phototourl.com/member/2026-11-09-9821d791-59ff-4a43-903f-afdebdf83c1f.jpg"
+        };
+
+        function switchSchedule(mode) {
+            const buttons = document.querySelectorAll('.mode-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            if(event && event.target) event.target.classList.add('active');
+            document.getElementById('scheduleImage').src = scheduleData[mode];
+        }
+
+        document.getElementById('checkinForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const studentId = document.getElementById('studentId').value.trim();
+            const status = document.getElementById('status').value;
+            const checkDate = document.getElementById('checkDate').value;
+            const btn = document.getElementById('submitBtn');
+
+            if(!studentId) return;
+
+            const todayStr = new Date(checkDate).toLocaleDateString();
+            const alreadyChecked = latestDataLogs.some(row => {
+                if(!row.timestamp) return false;
+                const rowDate = new Date(row.timestamp).toLocaleDateString();
+                return row.studentId === studentId && rowDate === todayStr;
+            });
+
+            if(alreadyChecked) {
+                showPopup(`คุณ ${studentId} ได้บันทึกการเช็คชื่อของวันนี้ไปแล้ว`);
+                return;
+            }
+
+            btn.style.opacity = '0.6';
+            btn.disabled = true;
+
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ studentId: studentId, status: status, date: checkDate })
+            })
+            .then(res => res.json())
+            .then(res => {
+                showPopup("บันทึกข้อมูลเรียบร้อยแล้ว");
+                document.getElementById('studentId').value = '';
+                loadData();
+            })
+            .catch(err => {
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
+                console.error(err);
+            })
+            .finally(() => {
+                btn.style.opacity = '1';
+                btn.disabled = false;
+            });
+        });
+
+        function copySummaryForLine() {
+            const checkDateVal = document.getElementById('checkDate').value;
+            const targetDateStr = new Date(checkDateVal).toLocaleDateString();
+            const todayDateFormatted = new Date(checkDateVal).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            const todayLogs = latestDataLogs.filter(row => {
+                if(!row.timestamp) return false;
+                return new Date(row.timestamp).toLocaleDateString() === targetDateStr;
+            });
+
+            let ontimeList = [];
+            let lateList = [];
+            let leaveList = [];
+            let absentListInput = [];
+
+            todayLogs.forEach(row => {
+                if(row.status === 'มาทันเวลา') ontimeList.push(row.studentId);
+                else if(row.status === 'มาสาย') lateList.push(row.studentId);
+                else if(row.status === 'ลา') leaveList.push(row.studentId);
+                else if(row.status === 'ขาด') absentListInput.push(row.studentId);
+            });
+
+            const checkedNames = todayLogs.map(r => r.studentId);
+            let notCheckedList = studentList.filter(name => !checkedNames.includes(name));
+            let totalAbsentOrNotChecked = [...absentListInput, ...notCheckedList];
+
+            let summaryText = `รายงานสรุปผลเช็คชื่อ ม.6/8\nประจำวันที่ ${todayDateFormatted}\n----------------------------------\n`;
+            summaryText += `มาทันเวลา (${ontimeList.length} คน):\n${ontimeList.length > 0 ? ontimeList.map((n, i) => `${i+1}. ${n}`).join('\n') : '- ไม่มี -'}\n\n`;
+            summaryText += `มาสาย (${lateList.length} คน):\n${lateList.length > 0 ? lateList.map((n, i) => `${i+1}. ${n}`).join('\n') : '- ไม่มี -'}\n\n`;
+            summaryText += `ลา (${leaveList.length} คน):\n${leaveList.length > 0 ? leaveList.map((n, i) => `${i+1}. ${n}`).join('\n') : '- ไม่มี -'}\n\n`;
+            summaryText += `ขาด / ยังไม่เช็คชื่อ (${totalAbsentOrNotChecked.length} คน):\n${totalAbsentOrNotChecked.length > 0 ? totalAbsentOrNotChecked.map((n, i) => `${i+1}. ${n}`).join('\n') : '- ไม่มี -'}\n----------------------------------\nระบบเช็คชื่อออนไลน์ ม.6/8`;
+
+            navigator.clipboard.writeText(summaryText).then(() => {
+                showPopup("คัดลอกรายงานสรุปผลเรียบร้อยแล้ว");
+            }).catch(err => {
+                alert("ไม่สามารถคัดลอกอัตโนมัติได้");
+            });
+        }
+
+        function loadData() {
+            if(!WEB_APP_URL) return;
+            fetch(WEB_APP_URL)
+            .then(res => res.json())
+            .then(data => {
+                latestDataLogs = data || [];
+                const tbody = document.getElementById('resultTable');
+                tbody.innerHTML = '';
+                
+                let countOntime = 0, countLate = 0, countLeave = 0, countAbsent = 0;
+
+                if(!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">ยังไม่มีข้อมูลวันนี้</td></tr>`;
+                    return;
+                }
+
+                data.reverse().forEach(row => {
+                    if(row.status === 'มาทันเวลา') countOntime++;
+                    else if(row.status === 'มาสาย') countLate++;
+                    else if(row.status === 'ลา') countLeave++;
+                    else if(row.status === 'ขาด') countAbsent++;
+
+                    let tr = document.createElement('tr');
+                    let timeObj = new Date(row.timestamp);
+                    let timeStr = timeObj.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                    let dateStr = timeObj.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+                    
+                    let badgeClass = 'badge-ontime';
+                    if(row.status === 'มาสาย') badgeClass = 'badge-late';
+                    else if(row.status === 'ลา') badgeClass = 'badge-leave';
+                    else if(row.status === 'ขาด') badgeClass = 'badge-absent';
+
+                    tr.innerHTML = `
+                        <td>${dateStr} (${timeStr})</td>
+                        <td style="font-weight: 500;">${row.studentId}</td>
+                        <td><span class="status-badge ${badgeClass}">${row.status}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById('statOntime').innerText = countOntime;
+                document.getElementById('statLate').innerText = countLate;
+                document.getElementById('statLeave').innerText = countLeave;
+                document.getElementById('statAbsent').innerText = countAbsent;
+
+            }).catch(err => console.error(err));
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
