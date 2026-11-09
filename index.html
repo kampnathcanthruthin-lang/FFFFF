@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ระบบเช็คชื่อแถวหน้าเสาธง ม.6/8 - รร.แม่สะเรียง 'บริพัตรศึกษา'</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0A0A0A;
+            --card-bg: rgba(20, 20, 30, 0.65);
+            --neon-purple: #c084fc;
+            --cyber-lime: #10b981;
+            --sunset-orange: #f97316;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Prompt', 'Kanit', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .cyber-grid {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(192, 132, 252, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(192, 132, 252, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            top: -15vh;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70vw;
+            height: 45vh;
+            background: radial-gradient(circle, rgba(192, 132, 252, 0.18) 0%, rgba(16, 185, 129, 0.08) 50%, transparent 75%);
+            z-index: 0;
+            pointer-events: none;
+            filter: blur(80px);
+        }
+
+        .wrapper {
+            position: relative;
+            z-index: 2;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(192, 132, 252, 0.25);
+            border-radius: 22px;
+            padding: 16px 26px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-img {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            border: 2px solid var(--neon-purple);
+            object-fit: cover;
+            box-shadow: 0 0 20px rgba(192, 132, 252, 0.5);
+            background: #fff;
+        }
+
+        .brand-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+        }
+
+        .brand-subtitle {
+            font-size: 0.82rem;
+            color: var(--neon-purple);
+            font-weight: 400;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge-class {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--cyber-lime);
+            border: 1.5px solid var(--cyber-lime);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-schedule {
+            background: rgba(192, 132, 252, 0.15);
+            color: var(--neon-purple);
+            border: 1.5px solid var(--neon-purple);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(192, 132, 252, 0.2);
+        }
+        .btn-schedule:hover {
+            background: var(--neon-purple);
+            color: #000;
+            box-shadow: 0 0 25px rgba(192, 132, 252, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+        @media(max-width: 680px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            header { flex-direction: column; gap: 14px; text-align: center; }
+            .brand { flex-direction: column; }
+            .header-actions { width: 100%; justify-content: center; }
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(192, 132, 252, 0.2);
+            border-radius: 18px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+        .stat-number {
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .hero-bento {
+            background: linear-gradient(145deg, rgba(22, 22, 32, 0.85) 0%, rgba(12, 12, 18, 0.95) 100%);
+            border: 2.5px solid rgba(192, 132, 252, 0.3);
+            border-radius: 32px;
+            padding: 38px 34px;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bento::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--neon-purple), var(--cyber-lime), var(--sunset-orange));
+        }
+
+        h1.main-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: clamp(2.2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ffffff 20%, var(--neon-purple) 70%, var(--sunset-orange) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 5px 30px rgba(192, 132, 252, 0.3);
+            letter-spacing: -0.02em;
+        }
+
+        .hero-desc {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 26px;
+            font-weight: 300;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1.5px solid rgba(192, 132, 252, 0.2);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            text-align: left;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media(max-width: 680px) {
+            .form-grid { grid-template-columns: 1fr; }
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label {
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-main);
+            letter-spacing: 0.02em;
+        }
+
+        input, select {
+            width: 100%;
+            background: rgba(10, 10, 16, 0.85);
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 14px 18px;
+            color: #fff;
+            font-family: 'Prompt', sans-serif;
+            font-size: 1.05rem;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:focus, select:focus {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 20px rgba(192, 132, 252, 0.35);
+            background: rgba(15, 15, 24, 0.95);
+        }
+
+        .btn-submit {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--neon-purple) 0%, #7c3aed 100%);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            padding: 16px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 25px rgba(192, 132, 252, 0.45);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 8px;
+            letter-spacing: 0.03em;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(192, 132, 252, 0.75);
+            background: linear-gradient(135deg, #d8b4fe 0%, var(--neon-purple) 100%);
+            border-color: #fff;
+        }
+
+        .section-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-container {
+            max-height: 220px;
+            overflow-y: auto;
+            border-radius: 14px;
+            border: 1.5px solid rgba(192, 132, 252, 0.15);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(192, 132, 252, 0.12);
+            color: var(--neon-purple);
+            padding: 12px 16px;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(192, 132, 252, 0.2);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-main);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+        .badge-ontime { background: rgba(16, 185, 129, 0.2); color: var(--cyber-lime); border: 1px solid var(--cyber-lime); }
+        .badge-late { background: rgba(249, 115, 22, 0.2); color: var(--sunset-orange); border: 1px solid var(--sunset-orange); }
+        .badge-leave { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; }
+        .badge-absent { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 5, 10, 0.82);
+            backdrop-filter: blur(16px);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-box {
+            background: rgba(22, 22, 32, 0.95);
+            border: 2.5px solid var(--neon-purple);
+            border-radius: 28px;
+            padding: 40px 32px;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 30px 70px rgba(192, 132, 252, 0.4);
+            transform: scale(0.85);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            font-size: 52px;
+            margin-bottom: 16px;
+            animation: floatIcon 2s infinite ease-in-out;
+        }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .modal-text {
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        .modal-btn {
+            background: linear-gradient(135deg, var(--neon-purple) 0%, #7c3aed 100%);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50px;
+            padding: 12px 40px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(192, 132, 252, 0.5);
+            transition: all 0.25s ease;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(192, 132, 252, 0.8);
+            border-color: #fff;
+        }
+
+        .schedule-box {
+            max-width: 700px;
+            width: 95%;
+            padding: 30px 24px;
+            text-align: left;
+        }
+
+        .schedule-modes {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.active, .mode-btn:hover {
+            background: var(--neon-purple);
+            color: #000;
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 15px rgba(192, 132, 252, 0.4);
+            font-weight: 600;
+        }
+
+        .schedule-img-container {
+            width: 100%;
+            height: 400px;
+            background: rgba(10, 10, 15, 0.9);
+            border: 2px dashed rgba(192, 132, 252, 0.3);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .schedule-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .schedule-placeholder {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 20px;
+            font-size: 0.95rem;
+        }
+
+        /* Student Autocomplete Dropdown Styles */
+        .autocomplete-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid rgba(192, 132, 252, 0.3);
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 220px;
+            overflow-y: auto;
+            border-radius: 0 0 14px 14px;
+            background: rgba(15, 15, 24, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+            display: none;
+        }
+
+        .autocomplete-items.show {
+            display: block;
+        }
+
+        .autocomplete-items div {
+            padding: 12px 18px;
+            cursor: pointer;
+            color: #fff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .autocomplete-items div:hover {
+            background: rgba(192, 132, 252, 0.25);
+            color: var(--neon-purple);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cyber-grid"></div>
+    <div class="ambient-glow"></div>
+
+    <!-- Popup Modal เช็คชื่อสำเร็จ -->
+    <div class="modal-overlay" id="popupModal">
+        <div class="modal-box">
+            <div class="modal-icon">💖</div>
+            <div class="modal-text">ได้บันทึกข้อมูลของคนน่ารักเรียบร้อยแล้วครับ</div>
+            <button class="modal-btn" onclick="closePopup()">ตกลง</button>
+        </div>
+    </div>
+
+    <!-- Schedule Modal ตารางเรียน -->
+    <div class="modal-overlay" id="scheduleModal">
+        <div class="modal-box schedule-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="font-family: 'Kanit', sans-serif; font-size: 1.3rem; font-weight: 600; color: var(--neon-purple);">📅 ตารางเรียนและกิจกรรม ม.6/8</div>
+                <button onclick="closeScheduleModal()" style="background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            
+            <div class="schedule-modes">
+                <button class="mode-btn active" onclick="switchSchedule('term1')">📚 ตารางเรียนหลัก</button>
+                <button class="mode-btn" onclick="switchSchedule('term2')">📖 ตารางเรียนสำรอง/เทอม 2</button>
+                <button class="mode-btn" onclick="switchSchedule('exam')">📝 ตารางสอบ</button>
+            </div>
+
+            <div class="schedule-img-container" id="scheduleViewContainer">
+                <div class="schedule-placeholder" id="schedulePlaceholder" style="display:none;">กำลังโหลดตารางเรียน...</div>
+                <img id="scheduleImage" src="" alt="ตารางเรียน ม.6/8">
+            </div>
+
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="modal-btn" onclick="closeScheduleModal()" style="padding: 10px 24px; font-size: 0.95rem;">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrapper">
+        <!-- Header -->
+        <header>
+            <div class="brand">
+                <img src="https://cdn.phototourl.com/member/2026-11-09-3f11b461-ae6c-4660-92d3-e2d0f8874582.jpg" alt="โลโก้โรงเรียน" class="logo-img" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png'">
+                <div>
+                    <div class="brand-title">รร.แม่สะเรียง "บริพัตรศึกษา"</div>
+                    <div class="brand-subtitle">ระบบเช็คชื่อแถวหน้าเสาธง</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-schedule" onclick="openScheduleModal()">📅 ดูตารางเรียน</button>
+                <div class="badge-class">ม.6/8</div>
+            </div>
+        </header>
+
+        <!-- Live Stats Dashboard -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="statOntime" style="color: var(--cyber-lime);">0</div>
+                <div class="stat-label">✅ มาทันเวลา</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statLate" style="color: var(--sunset-orange);">0</div>
+                <div class="stat-label">⚠️ มาสาย</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statLeave" style="color: #60a5fa;">0</div>
+                <div class="stat-label">🟦 ลา</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statAbsent" style="color: #f87171;">0</div>
+                <div class="stat-label">❌ ขาดเรียน</div>
+            </div>
+        </div>
+
+        <!-- Hero Bento Section -->
+        <section class="hero-bento">
+            <h1 class="main-title">MORNING CHECK-IN 6/8</h1>
+            <p class="hero-desc">ระบบบันทึกเวลามาแถวหน้าเสาธงออนไลน์ ดีไซน์ล้ำสมัย รวดเร็ว แม่นยำ</p>
+            
+            <div class="glass-card" style="background: rgba(12, 12, 18, 0.7);">
+                <form id="checkinForm" class="form-grid">
+                    <div class="input-group">
+                        <label for="studentId">คลิกเลือกชื่อ หรือ พิมพ์ค้นหา</label>
+                        <div class="autocomplete-container">
+                            <input type="text" id="studentId" placeholder="คลิกเพื่อเลือกชื่อ หรือพิมพ์หา..." required autocomplete="off">
+                            <div id="autocompleteList" class="autocomplete-items"></div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="status">สถานะการมาเรียน</label>
+                        <select id="status">
+                            <option value="มาทันเวลา">✅ มาทันเวลา</option>
+                            <option value="มาสาย">⚠️ มาสาย</option>
+                            <option value="ลา">🟦 ลา (มีใบลา)</option>
+                            <option value="ขาด">❌ ขาดเรียน</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="submitBtn" class="btn-submit">บันทึกข้อมูลเข้าสู่ระบบ</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Data Table Section -->
+        <section class="glass-card">
+            <div class="section-title">📊 รายงานการเข้าแถววันนี้</div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>เวลา</th>
+                            <th>ชื่อ - สกุล นักเรียน</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultTable">
+                        <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">กำลังโหลดข้อมูล...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwcRtM9amOcrQfxwx1-_L0n7efhDXC3vv4EXxX_RewVBSBI9MZAbDlFj-6QvrjHpQUP/exec";
+
+        // รายชื่อนักเรียนห้อง ม.6/8 ทั้ง 37 คน
+        const studentList = [
+            "นาย กัมปนาท จันทรุทิน",
+            "นาย ธีรภัทร โสมิญะ",
+            "นาย สุรัลต์ชาญ ไทสวัสดิ์กุล",
+            "นาย อติกันต์ ไผ่อุรุวนา",
+            "นาย เอื้ออังกูร กรีแก้ว",
+            "นาย วิชยุตม์ ฝั้นวีระ",
+            "นาย พาทิศ ใจรักสงบ",
+            "นางสาว จันทพร อรัญญางาม",
+            "นางสาว จิณัฐตา มาสี",
+            "นางสาว ฉัตรฑริกา ก้างยาง",
+            "นางสาว เบญจมาศ เลิศอนันต์วิมล",
+            "นางสาว ภูริชญา รุ่งเรือง",
+            "นางสาว วิภานันท์ ษมาจิตรุ่งเรือง",
+            "นางสาว อริสรา ศรีไว",
+            "นางสาว เสาร์วรินทร์ วรีรัตน์",
+            "นางสาว เบญญา ไพรวัลย์",
+            "นางสาว สุรารักษ์ สมบัติทองแท้",
+            "นางสาว กัลย์สุดา สิริเสริมใบบุญ",
+            "นางสาว กาญจนา วนาเจริญ",
+            "นางสาว เขมลาวัณย์ มณีรัตน์ไพบูลย์",
+            "นางสาว แคทรียา จอมแกล้วกล้า",
+            "นางสาว งามศิริ พิมพารุ่งโรจน์",
+            "นางสาว จารุภา นิธิในเกียรติ",
+            "นางสาว จิรนันท์ นวลแสง",
+            "นางสาว ชยุดา ไสวสายเมือง",
+            "นางสาว ณฐินี คงเปรมปรีดิ์",
+            "นางสาว นิรดา ชื่นเพลิน",
+            "นางสาว พัชมัย ใฝ่เงินทอง",
+            "นางสาว รัตยากร หทัยภักดี",
+            "นางสาว ศุภสตา นิธิเบญจพร",
+            "นางสาว โศรดา เลิศพิจารณ์นิติ",
+            "นางสาว สายน้ำ สุริยะ",
+            "นางสาว สิรินดา รติเทวินทร์",
+            "นางสาว สุภานัน มาลีสุข",
+            "นางสาว อรพรรณ ภูไพรเจริญ",
+            "นางสาว อริยา คงกิจมั่นเลิศ",
+            "นางสาว สุพินาล ประสงค์เลิศกุล"
+        ];
+
+        // ระบบเลื่อนหารายชื่อและคลิกเลือก
+        const inputField = document.getElementById("studentId");
+        const listContainer = document.getElementById("autocompleteList");
+
+        function renderList(filterText = "") {
+            listContainer.innerHTML = "";
+            const filtered = studentList.filter(name => name.toLowerCase().includes(filterText.toLowerCase()));
+            
+            if (filtered.length === 0) {
+                listContainer.classList.remove("show");
+                return;
+            }
+
+            filtered.forEach(name => {
+                const item = document.createElement("div");
+                item.innerText = name;
+                item.addEventListener("click", function() {
+                    inputField.value = name;
+                    listContainer.classList.remove("show");
+                });
+                listContainer.appendChild(item);
+            });
+            listContainer.classList.add("show");
+        }
+
+        // กดคลิกช่องปุ๊บ แสดงรายชื่อทั้งหมดให้เลื่อนหาทันที
+        inputField.addEventListener("focus", function() {
+            renderList(this.value);
+        });
+
+        // พิมพ์กรองรายชื่อแบบเรียลไทม์
+        inputField.addEventListener("input", function() {
+            renderList(this.value);
+        });
+
+        // คลิกนอกช่องแล้วปิดลิสต์
+        document.addEventListener("click", function(e) {
+            if (e.target !== inputField && !listContainer.contains(e.target)) {
+                listContainer.classList.remove("show");
+            }
+        });
+
+        // เสียงเอฟเฟกต์ไซเบอร์
+        function playClickSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(580, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.08);
+            } catch(e) {}
+        }
+
+        function showPopup() {
+            playClickSound();
+            document.getElementById('popupModal').classList.add('active');
+        }
+
+        function closePopup() {
+            document.getElementById('popupModal').classList.remove('active');
+        }
+
+        function openScheduleModal() {
+            playClickSound();
+            document.getElementById('scheduleModal').classList.add('active');
+            switchSchedule('term1');
+        }
+
+        function closeScheduleModal() {
+            document.getElementById('scheduleModal').classList.remove('active');
+        }
+
+        const scheduleData = {
+            term1: "https://cdn.phototourl.com/member/2026-11-09-9821d791-59ff-4a43-903f-afdebdf83c1f.jpg",
+            term2: "https://cdn.phototourl.com/member/2026-11-09-9821d791-59ff-4a43-903f-afdebdf83c1f.jpg",
+            exam: "https://cdn.phototourl.com/member/2026-11-09-9821d791-59ff-4a43-903f-afdebdf83c1f.jpg"
+        };
+
+        function switchSchedule(mode) {
+            const buttons = document.querySelectorAll('.mode-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            if(event && event.target) event.target.classList.add('active');
+
+            const imgElement = document.getElementById('scheduleImage');
+            const placeholder = document.getElementById('schedulePlaceholder');
+
+            if(scheduleData[mode]) {
+                imgElement.src = scheduleData[mode];
+                imgElement.style.display = 'block';
+                placeholder.style.display = 'none';
+            }
+        }
+
+        document.getElementById('checkinForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const studentId = document.getElementById('studentId').value.trim();
+            const status = document.getElementById('status').value;
+            const btn = document.getElementById('submitBtn');
+
+            if(!studentId) return;
+
+            btn.style.opacity = '0.6';
+            btn.disabled = true;
+
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ studentId: studentId, status: status })
+            })
+            .then(res => res.json())
+            .then(res => {
+                showPopup();
+                document.getElementById('studentId').value = '';
+                document.getElementById('studentId').focus();
+                loadData();
+            })
+            .catch(err => {
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง");
+                console.error(err);
+            })
+            .finally(() => {
+                btn.style.opacity = '1';
+                btn.disabled = false;
+            });
+        });
+
+        function loadData() {
+            if(!WEB_APP_URL) return;
+            fetch(WEB_APP_URL)
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById('resultTable');
+                tbody.innerHTML = '';
+                
+                let countOntime = 0;
+                let countLate = 0;
+                let countLeave = 0;
+                let countAbsent = 0;
+
+                if(!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">ยังไม่มีข้อมูลวันนี้</td></tr>`;
+                    return;
+                }
+
+                data.reverse().forEach(row => {
+                    if(row.status === 'มาทันเวลา') countOntime++;
+                    else if(row.status === 'มาสาย') countLate++;
+                    else if(row.status === 'ลา') countLeave++;
+                    else if(row.status === 'ขาด') countAbsent++;
+
+                    let tr = document.createElement('tr');
+                    let timeStr = new Date(row.timestamp).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                    
+                    let badgeClass = 'badge-ontime';
+                    if(row.status === 'มาสาย') badgeClass = 'badge-late';
+                    else if(row.status === 'ลา') badgeClass = 'badge-leave';
+                    else if(row.status === 'ขาด') badgeClass = 'badge-absent';
+
+                    tr.innerHTML = `
+                        <td>${timeStr}</td>
+                        <td style="font-weight: 600;">${row.studentId}</td>
+                        <td><span class="status-badge ${badgeClass}">${row.status}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById('statOntime').innerText = countOntime;
+                document.getElementById('statLate').innerText = countLate;
+                document.getElementById('statLeave').innerText = countLeave;
+                document.getElementById('statAbsent').innerText = countAbsent;
+
+            }).catch(err => console.error(err));
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
